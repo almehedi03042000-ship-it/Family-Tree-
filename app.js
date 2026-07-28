@@ -1,23 +1,17 @@
-// ==========================================
-// 1. STATE & INITIAL CONFIGURATION
-// ==========================================
 let familyData = [];
 let currentRootId = null;
 let svg, g, zoomHandler;
 let isAdminLoggedIn = false;
 
-// Default Avatars for Missing Photos (Gender-based Cartoon Avatars)
 const DEFAULT_MALE_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=SardarMaleAvatar&backgroundColor=b6e3f4";
 const DEFAULT_FEMALE_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=SardarFemaleAvatar&backgroundColor=ffdfbf";
 
-// Initial Demo Data for Sardar Family
 const demoData = [
-    { id: "1", name: "আব্দুল সরদার", nameEn: "Abdul Sardar", gender: "male", fatherId: null, motherId: null, dob: "1945-01-01", isDeceased: false, occupation: "কৃষক", photo: "", gallery: [] },
-    { id: "2", name: "রহিমা খাতুন", nameEn: "Rahima Khatun", gender: "female", fatherId: null, motherId: null, dob: "1950-03-10", isDeceased: false, occupation: "গৃহিণী", photo: "", gallery: [] },
-    { id: "3", name: "রফিকুল সরদার", nameEn: "Rofiqul Sardar", gender: "male", fatherId: "1", motherId: "2", dob: "1975-06-15", isDeceased: false, occupation: "ব্যবসা", photo: "", gallery: [] }
+    { id: "1", name: "আব্দুল সরদার", nameEn: "Abdul Sardar", gender: "male", fatherId: null, motherId: null, dob: "1945-01-01", isDeceased: false, occupation: "কৃষক", photo: "" },
+    { id: "2", name: "রহিমা খাতুন", nameEn: "Rahima Khatun", gender: "female", fatherId: null, motherId: null, dob: "1950-03-10", isDeceased: false, occupation: "গৃহিণী", photo: "" },
+    { id: "3", name: "রফিকুল সরদার", nameEn: "Rofiqul Sardar", gender: "male", fatherId: "1", motherId: "2", dob: "1975-06-15", isDeceased: false, occupation: "ব্যবসায়ী", photo: "" }
 ];
 
-// App Initialization
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     loadFamilyData();
@@ -29,9 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initMobileHistorySupport();
 });
 
-// ==========================================
-// 2. THEME & LOCALSTORAGE MANAGEMENT
-// ==========================================
 function initTheme() {
     const savedTheme = localStorage.getItem("theme") || "dark";
     if (savedTheme === "dark") {
@@ -41,15 +32,12 @@ function initTheme() {
     }
 }
 
-document.getElementById("themeToggleBtn").addEventListener("click", () => {
+document.getElementById("themeToggleBtn").onclick = () => {
     const isDark = document.documentElement.classList.toggle("dark");
     localStorage.setItem("theme", isDark ? "dark" : "light");
     renderTree();
-});
+};
 
-// ==========================================
-// 3. D3 CANVAS & TREE RENDERING
-// ==========================================
 function initD3Canvas() {
     svg = d3.select("#treeSvg");
     g = d3.select("#treeGroup");
@@ -86,76 +74,76 @@ function renderTree() {
     if (familyData.length === 0) return;
 
     const root = buildHierarchy();
-    const treeLayout = d3.tree().nodeSize([220, 180]);
+    const treeLayout = d3.tree().nodeSize([200, 160]);
     treeLayout(root);
 
-    // Connector Lines
+    // Links
     g.selectAll(".link")
         .data(root.links())
         .enter()
         .append("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", document.documentElement.classList.contains("dark") ? "#4b5563" : "#cbd5e1")
+        .attr("stroke", document.documentElement.classList.contains("dark") ? "#374151" : "#d1d5db")
         .attr("stroke-width", 2)
         .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
 
-    // Nodes (Cards)
+    // Nodes
     const node = g.selectAll(".node")
         .data(root.descendants())
         .enter()
         .append("g")
         .attr("class", d => `node cursor-pointer id-${d.data.id}`)
-        .attr("transform", d => `translate(${d.x - 80},${d.y - 45})`)
+        .attr("transform", d => `translate(${d.x - 75},${d.y - 40})`)
         .on("click", (event, d) => openProfileModal(d.data.id));
 
-    // Card Box
+    // Card Rect
     node.append("rect")
-        .attr("width", 160)
-        .attr("height", 95)
-        .attr("rx", 14)
-        .attr("fill", document.documentElement.classList.contains("dark") ? "#1f2937" : "#ffffff")
+        .attr("width", 150)
+        .attr("height", 85)
+        .attr("rx", 16)
+        .attr("fill", document.documentElement.classList.contains("dark") ? "#111827" : "#ffffff")
         .attr("stroke", d => d.data.gender === "male" ? "#3b82f6" : "#ec4899")
         .attr("stroke-width", 2);
 
-    // Profile Photo / Gender Avatar
+    // Profile Photo
     node.append("foreignObject")
-        .attr("x", 55)
-        .attr("y", -20)
-        .attr("width", 50)
-        .attr("height", 50)
+        .attr("x", 52)
+        .attr("y", -18)
+        .attr("width", 46)
+        .attr("height", 46)
         .html(d => {
             const imgSrc = d.data.photo || (d.data.gender === "female" ? DEFAULT_FEMALE_AVATAR : DEFAULT_MALE_AVATAR);
-            return `<img src="${imgSrc}" class="w-12 h-12 rounded-full border-2 border-amber-500 bg-amber-50 object-cover shadow">`;
+            return `<img src="${imgSrc}" class="w-11 h-11 rounded-2xl border-2 border-amber-500 bg-amber-50 object-cover shadow-md">`;
         });
 
-    // Member Name (Bengali)
+    // Name Bengali
     node.append("text")
-        .attr("x", 80)
-        .attr("y", 42)
+        .attr("x", 75)
+        .attr("y", 40)
         .attr("text-anchor", "middle")
         .attr("class", "fill-gray-800 dark:fill-gray-100 font-bold text-xs")
         .text(d => d.data.name);
 
-    // Member Name (English)
+    // Name English
     node.append("text")
-        .attr("x", 80)
-        .attr("y", 56)
+        .attr("x", 75)
+        .attr("y", 53)
         .attr("text-anchor", "middle")
         .attr("class", "fill-gray-400 dark:fill-gray-400 text-[10px] italic")
         .text(d => d.data.nameEn || "");
 
-    // Age / Birth Year Badge
+    // Badge
     node.append("foreignObject")
         .attr("x", 15)
-        .attr("y", 65)
-        .attr("width", 130)
-        .attr("height", 25)
+        .attr("y", 60)
+        .attr("width", 120)
+        .attr("height", 20)
         .html(d => {
             const year = d.data.dob ? new Date(d.data.dob).getFullYear() : 'N/A';
-            return `<div class="flex justify-center items-center space-x-1 text-[10px]">
-                <span class="bg-amber-500 text-white px-1.5 py-0.2 rounded">${year}</span>
-                <span class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1.5 py-0.2 rounded">${d.data.gender === 'male' ? 'পুরুষ' : 'নারী'}</span>
+            return `<div class="flex justify-center items-center space-x-1 text-[9px]">
+                <span class="bg-amber-500 text-white px-1.5 py-0.2 rounded-md font-semibold">${year}</span>
+                <span class="bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-1.5 py-0.2 rounded-md">${d.data.gender === 'male' ? 'পুরুষ' : 'নারী'}</span>
             </div>`;
         });
 
@@ -166,13 +154,10 @@ function renderTree() {
 document.getElementById("zoomInBtn").onclick = () => svg.transition().call(zoomHandler.scaleBy, 1.2);
 document.getElementById("zoomOutBtn").onclick = () => svg.transition().call(zoomHandler.scaleBy, 0.8);
 function resetZoom() {
-    svg.transition().duration(500).call(zoomHandler.transform, d3.zoomIdentity.translate(window.innerWidth / 2 - 80, 100).scale(1));
+    svg.transition().duration(500).call(zoomHandler.transform, d3.zoomIdentity.translate(window.innerWidth / 2 - 75, 120).scale(1));
 }
 document.getElementById("resetZoomBtn").onclick = resetZoom;
 
-// ==========================================
-// 4. DATA MANAGEMENT & STATISTICS
-// ==========================================
 function loadFamilyData() {
     const saved = localStorage.getItem("sardarFamilyTreeData");
     familyData = saved ? JSON.parse(saved) : demoData;
@@ -191,9 +176,7 @@ function updateStatistics() {
     document.getElementById("topStatFemale").innerText = familyData.filter(m => m.gender === "female").length;
 }
 
-// ==========================================
-// 5. SEARCH ENGINE (BENGALI + ENGLISH)
-// ==========================================
+// Search Engine
 const searchInput = document.getElementById("searchInput");
 const searchSuggestions = document.getElementById("searchSuggestions");
 
@@ -215,8 +198,8 @@ searchInput.addEventListener("input", (e) => {
         searchSuggestions.classList.remove("hidden");
         matches.forEach(m => {
             const div = document.createElement("div");
-            div.className = "p-2 hover:bg-amber-50 dark:hover:bg-gray-700 cursor-pointer text-xs border-b border-gray-100 dark:border-gray-700 flex justify-between";
-            div.innerHTML = `<span><b>${m.name}</b> <i class="text-gray-400">(${m.nameEn || ''})</i></span><span class="text-gray-400">${m.gender === 'male' ? 'পুরুষ' : 'নারী'}</span>`;
+            div.className = "p-2 hover:bg-amber-50 dark:hover:bg-gray-700/50 cursor-pointer text-xs flex justify-between items-center";
+            div.innerHTML = `<span><b>${m.name}</b> <i class="text-gray-400">(${m.nameEn || ''})</i></span><span class="text-[10px] text-gray-400">${m.gender === 'male' ? 'পুরুষ' : 'নারী'}</span>`;
             div.onclick = () => highlightMember(m.id);
             searchSuggestions.appendChild(div);
         });
@@ -233,7 +216,7 @@ function highlightMember(id) {
     const targetNode = d3.select(`.id-${id} rect`);
     
     if (!targetNode.empty()) {
-        targetNode.transition().duration(300).attr("stroke", "#f59e0b").attr("stroke-width", 5);
+        targetNode.transition().duration(300).attr("stroke", "#f59e0b").attr("stroke-width", 4);
         const d3Data = d3.select(`.id-${id}`).datum();
         if (d3Data) {
             svg.transition().duration(750).call(
@@ -244,14 +227,8 @@ function highlightMember(id) {
     }
 }
 
-// ==========================================
-// 6. MOBILE BACK BUTTON & HISTORY STATE
-// ==========================================
 function initMobileHistorySupport() {
-    window.addEventListener("popstate", (event) => {
-        // Close any open modals when mobile back button is pressed
-        closeAllModals();
-    });
+    window.addEventListener("popstate", () => closeAllModals());
 }
 
 function pushModalState() {
@@ -264,9 +241,6 @@ function closeAllModals() {
     document.getElementById("adminLoginModal").classList.add("hidden");
 }
 
-// ==========================================
-// 7. PROFILE MODAL & ADMIN ACCESS CONTROL
-// ==========================================
 function openProfileModal(id) {
     const m = familyData.find(item => item.id === id);
     if (!m) return;
@@ -277,10 +251,11 @@ function openProfileModal(id) {
     document.getElementById("modalNameEn").innerText = m.nameEn ? `(${m.nameEn})` : '';
     document.getElementById("modalPhoto").src = m.photo || (m.gender === "female" ? DEFAULT_FEMALE_AVATAR : DEFAULT_MALE_AVATAR);
     document.getElementById("modalBadge").innerText = m.gender === "male" ? "পুরুষ" : "নারী";
-    document.getElementById("modalBadge").className = `text-xs px-2.5 py-0.5 rounded-full font-medium ${m.gender === 'male' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800'}`;
+    document.getElementById("modalBadge").className = `text-[10px] px-2 py-0.5 rounded-full font-semibold ${m.gender === 'male' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200' : 'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-200'}`;
     document.getElementById("modalOccupation").innerText = m.occupation || "-";
     document.getElementById("modalDob").innerText = m.dob || "-";
-    document.getElementById("modalDod").innerText = m.isDeceased ? "মৃত" : "জীবিত";
+    document.getElementById("modalDod").innerText = m.isDeceased ? "মৃত" : "-";
+    document.getElementById("modalStatus").innerText = m.isDeceased ? "মৃত" : "জীবিত";
 
     const father = familyData.find(f => f.id === m.fatherId);
     document.getElementById("modalFather").innerText = father ? father.name : "-";
@@ -288,7 +263,6 @@ function openProfileModal(id) {
     const mother = familyData.find(f => f.id === m.motherId);
     document.getElementById("modalMother").innerText = mother ? mother.name : "-";
 
-    // Show/Hide Edit Button depending on Admin Login State
     const editBtn = document.getElementById("adminEditMemberBtn");
     if (isAdminLoggedIn) {
         editBtn.classList.remove("hidden");
@@ -310,9 +284,6 @@ function openProfileModal(id) {
     document.getElementById("profileModal").classList.remove("hidden");
 }
 
-// ==========================================
-// 8. ADMIN LOGIN & FORM HANDLING
-// ==========================================
 document.getElementById("adminLoginBtn").onclick = () => {
     if (isAdminLoggedIn) {
         pushModalState();
@@ -326,9 +297,8 @@ document.getElementById("adminLoginBtn").onclick = () => {
 document.getElementById("adminLoginForm").onsubmit = (e) => {
     e.preventDefault();
     const pass = document.getElementById("adminPassword").value;
-    if (pass === "12345") { // Admin Password
+    if (pass === "12345") {
         isAdminLoggedIn = true;
-        alert("অ্যাডমিন লগইন সফল হয়েছে!");
         document.getElementById("adminLoginModal").classList.add("hidden");
         document.getElementById("adminDrawer").classList.remove("hidden");
         document.getElementById("adminPassword").value = "";
@@ -339,13 +309,12 @@ document.getElementById("adminLoginForm").onsubmit = (e) => {
 
 document.getElementById("adminLogoutBtn").onclick = () => {
     isAdminLoggedIn = false;
-    alert("অ্যাডমিন লগআউট হয়েছে।");
     closeAllModals();
 };
 
 function openEditForm(member) {
     document.getElementById("adminDrawer").classList.remove("hidden");
-    document.getElementById("formTitle").innerText = "সদস্য তথ্য এডিট করুন";
+    document.getElementById("formTitle").innerText = "তথ্য এডিট করুন";
     document.getElementById("editMemberId").value = member.id;
     document.getElementById("formName").value = member.name || "";
     document.getElementById("formNameEn").value = member.nameEn || "";
@@ -357,7 +326,6 @@ function openEditForm(member) {
     document.getElementById("formOccupation").value = member.occupation || "";
 }
 
-// Image File Convert to Base64
 function getBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -367,12 +335,10 @@ function getBase64(file) {
     });
 }
 
-// Member Form Submit (Add/Edit)
 document.getElementById("memberForm").onsubmit = async (e) => {
     e.preventDefault();
     const editId = document.getElementById("editMemberId").value;
     
-    // Photo Upload Process
     const photoInput = document.getElementById("formPhotoUpload");
     let photoData = "";
     if (photoInput.files.length > 0) {
