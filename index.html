@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বংশাবলি - প্রিমিয়াম ফ্যামিলি ট্র্যাকার</title>
-    <!-- Tailwind CSS -->
+    <title>সরদার বংশবৃক্ষ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,28 +11,230 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' }
+                        brand: { 50: '#fff7ed', 500: '#f97316', 600: '#ea580c', 700: '#c2410c' }
                     }
                 }
             }
         }
     </script>
-    <!-- Google Bengali Font -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-['Hind_Siliguri'] overflow-hidden h-screen w-screen flex flex-col">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex items-center justify-between z-30 shadow-sm">
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2.5 flex flex-wrap items-center justify-between z-30 shadow-sm gap-2">
+        
         <div class="flex items-center space-x-3 space-x-reverse">
-            <i class="fa-solid fa-sitemap text-emerald-600 text-2xl"></i>
-            <h1 class="text-xl font-bold tracking-wide">বংশাবলি <span class="text-xs px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 rounded-full">v1.0</span></h1>
+            <i class="fa-solid fa-tree text-amber-600 text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-wide text-gray-900 dark:text-white">সরদার বংশবৃক্ষ</h1>
         </div>
 
+        <div class="flex items-center space-x-3 space-x-reverse text-xs bg-amber-50 dark:bg-gray-700/60 px-3 py-1.5 rounded-xl border border-amber-200/60 dark:border-gray-600">
+            <div class="flex items-center space-x-1 space-x-reverse">
+                <span class="text-gray-500 dark:text-gray-400">মোট:</span>
+                <b id="topStatTotal" class="text-amber-600 dark:text-amber-400 font-bold">0</b>
+            </div>
+            <span class="text-gray-300 dark:text-gray-600">|</span>
+            <div class="flex items-center space-x-1 space-x-reverse">
+                <span class="text-gray-500 dark:text-gray-400">পুরুষ:</span>
+                <b id="topStatMale" class="text-blue-600 dark:text-blue-400 font-bold">0</b>
+            </div>
+            <span class="text-gray-300 dark:text-gray-600">|</span>
+            <div class="flex items-center space-x-1 space-x-reverse">
+                <span class="text-gray-500 dark:text-gray-400">নারী:</span>
+                <b id="topStatFemale" class="text-pink-600 dark:text-pink-400 font-bold">0</b>
+            </div>
+        </div>
+
+        <div class="relative w-60 md:w-80">
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="বাংলা বা ইংরেজি নামে খুঁজুন..." 
+                       class="w-full bg-gray-100 dark:bg-gray-700 text-xs rounded-lg pl-9 pr-4 py-2 border border-transparent focus:border-amber-500 focus:bg-white dark:focus:bg-gray-800 outline-none transition">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-gray-400 text-xs"></i>
+            </div>
+            <div id="searchSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto z-50"></div>
+        </div>
+
+        <div class="flex items-center space-x-2 space-x-reverse">
+            <button id="themeToggleBtn" title="থিম পরিবর্তন" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                <i class="fa-solid fa-moon dark:hidden text-gray-600"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+            </button>
+            <button id="adminLoginBtn" title="অ্যাডমিন প্যানেল" class="p-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition">
+                <i class="fa-solid fa-user-lock"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 relative overflow-hidden flex">
+        
+        <div class="absolute bottom-6 right-6 z-20 flex flex-col space-y-2 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <button id="zoomInBtn" title="Zoom In" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-plus"></i></button>
+            <button id="zoomOutBtn" title="Zoom Out" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-minus"></i></button>
+            <button id="resetZoomBtn" title="Reset View" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-expand"></i></button>
+            <button id="resetSubtreeBtn" title="মূল ট্রিতে ফিরুন" class="hidden w-10 h-10 flex items-center justify-center bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg"><i class="fa-solid fa-sitemap"></i></button>
+        </div>
+
+        <main id="treeContainer" class="w-full h-full cursor-grab active:cursor-grabbing relative overflow-hidden bg-gray-50 dark:bg-gray-950">
+            <svg id="treeSvg" class="w-full h-full">
+                <g id="treeGroup"></g>
+            </svg>
+        </main>
+    </div>
+
+    <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="relative bg-amber-600 h-28 p-4 flex items-end">
+                <button id="closeProfileBtn" class="absolute top-3 right-3 text-white bg-black/30 hover:bg-black/50 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center space-x-4 space-x-reverse transform translate-y-8">
+                    <img id="modalPhoto" src="" class="w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 object-cover shadow-md bg-amber-100">
+                    <div>
+                        <h2 id="modalName" class="text-xl font-bold text-gray-900 dark:text-white mt-8"></h2>
+                        <p id="modalNameEn" class="text-xs text-gray-500 dark:text-gray-300 italic"></p>
+                        <span id="modalBadge" class="text-xs px-2.5 py-0.5 rounded-full font-medium mt-1 inline-block"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 pt-12 overflow-y-auto space-y-4 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                    <div><b>জন্ম তারিখ:</b> <span id="modalDob">-</span></div>
+                    <div><b>মৃত্যু তারিখ:</b> <span id="modalDod">-</span></div>
+                    <div><b>পেশা:</b> <span id="modalOccupation">-</span></div>
+                    <div><b>মোবাইল:</b> <span id="modalPhone">-</span></div>
+                    <div class="col-span-2"><b>ঠিকানা:</b> <span id="modalAddress">-</span></div>
+                </div>
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-2">জীবনী (Biography)</h4>
+                    <p id="modalBio" class="text-gray-600 dark:text-gray-300 text-xs leading-relaxed"></p>
+                </div>
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-2">পারিবারিক সম্পর্ক</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><b>পিতা:</b> <span id="modalFather">-</span></div>
+                        <div><b>মাতা:</b> <span id="modalMother">-</span></div>
+                        <div><b>জীবনসঙ্গী:</b> <span id="modalSpouse">-</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold border-b pb-1 mb-2">ছবি গ্যালারি</h4>
+                    <div id="modalGallery" class="flex space-x-2 space-x-reverse overflow-x-auto py-2"></div>
+                </div>
+                <div class="flex justify-between items-center pt-2 border-t">
+                    <button id="adminEditMemberBtn" class="hidden bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-amber-600 transition"><i class="fa-solid fa-pen-to-square mr-1"></i> এই তথ্য এডিট করুন (অ্যাডমিন)</button>
+                    <button id="viewSubtreeBtn" class="bg-amber-600 text-white px-4 py-2 rounded-lg text-xs hover:bg-amber-700 transition">এই সদস্য থেকে সাখাট্রি দেখুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminLoginModal" class="hidden fixed inset-0 z-60 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-sm p-6 rounded-2xl shadow-2xl relative">
+            <button id="closeAdminLoginBtn" class="absolute top-3 right-3 text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-center mb-4"><i class="fa-solid fa-user-shield text-amber-600 mr-2"></i>অ্যাডমিন লগইন</h3>
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium">পাসওয়ার্ড দিন</label>
+                    <input type="password" id="adminPassword" required class="w-full text-sm p-2.5 rounded-lg border dark:bg-gray-700 dark:border-gray-600 mt-1 outline-none focus:border-amber-500">
+                </div>
+                <button type="submit" class="w-full bg-amber-600 text-white py-2.5 rounded-lg text-xs font-bold hover:bg-amber-700 transition">লগইন করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="adminDrawer" class="hidden fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-gray-800 shadow-2xl flex flex-col border-l border-gray-200 dark:border-gray-700">
+        <div class="p-4 bg-amber-600 text-white flex justify-between items-center">
+            <h3 class="font-bold text-base"><i class="fa-solid fa-sliders mr-2"></i>অ্যাডমিন কন্ট্রোল প্যানেল</h3>
+            <button id="closeAdminBtn" class="text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto space-y-6">
+            
+            <form id="memberForm" class="space-y-3">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400 border-b pb-1" id="formTitle">নতুন সদস্য যোগ করুন</h4>
+                <input type="hidden" id="editMemberId">
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium">নাম (বাংলায়)*</label>
+                        <input type="text" id="formName" required class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium">Name (English)</label>
+                        <input type="text" id="formNameEn" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium">লিঙ্গ*</label>
+                        <select id="formGender" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                            <option value="male">পুরুষ</option>
+                            <option value="female">মহিলা</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium">অবস্থা</label>
+                        <select id="formIsDeceased" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                            <option value="false">জীবিত</option>
+                            <option value="true">মৃত</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium">পিতা</label>
+                        <select id="formFather" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border"></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium">মাতা</label>
+                        <select id="formMother" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-medium">জন্ম তারিখ</label>
+                        <input type="date" id="formDob" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium">পেশা</label>
+                        <input type="text" id="formOccupation" class="w-full text-xs p-2 rounded bg-gray-50 dark:bg-gray-700 border">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium">প্রোফাইল ছবি আপলোড</label>
+                    <input type="file" id="formPhotoUpload" accept="image/*" class="w-full text-xs p-1 rounded bg-gray-50 dark:bg-gray-700 border">
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium">গ্যালারির জন্য ছবি নির্বাচন (একাধিক)</label>
+                    <input type="file" id="formGalleryUpload" accept="image/*" multiple class="w-full text-xs p-1 rounded bg-gray-50 dark:bg-gray-700 border">
+                </div>
+
+                <button type="submit" class="w-full bg-amber-600 text-white py-2 rounded-lg text-xs font-bold hover:bg-amber-700 transition">সংরক্ষণ করুন</button>
+            </form>
+
+            <div class="space-y-2 border-t pt-4">
+                <h4 class="font-bold text-xs uppercase tracking-wider text-gray-400">ডাটা ব্যাকআপ ও রিস্টোর</h4>
+                <div class="flex space-x-2 space-x-reverse">
+                    <button id="exportJsonBtn" class="flex-1 bg-gray-100 dark:bg-gray-700 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200"><i class="fa-solid fa-download mr-1"></i> JSON এক্সপোর্ট</button>
+                    <label class="flex-1 bg-gray-100 dark:bg-gray-700 py-2 rounded-lg text-xs font-semibold hover:bg-gray-200 text-center cursor-pointer">
+                        <i class="fa-solid fa-upload mr-1"></i> JSON ইমপোর্ট
+                        <input type="file" id="importJsonInput" class="hidden" accept=".json">
+                    </label>
+                </div>
+            </div>
+            
+            <button id="adminLogoutBtn" class="w-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300 py-2 rounded-lg text-xs font-bold hover:bg-red-200">অ্যাডমিন লগআউট</button>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
         <!-- Search Box with Suggestions -->
         <div class="relative w-72 md:w-96">
             <div class="relative">
